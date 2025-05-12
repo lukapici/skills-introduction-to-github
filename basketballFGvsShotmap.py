@@ -17,6 +17,7 @@ event_list = cursor.fetchall()
 conn.close()
 
 for event in event_list:
+    event = str(event[0])
     responseEvent = requests.get("https://www.sofascore.com/api/v1/event/" + event)
     apiEvent = responseEvent.json()
     homeTeamID, awayTeamID = apiEvent["event"]["homeTeam"]["id"], apiEvent["event"]["awayTeam"]["id"]
@@ -42,10 +43,9 @@ for event in event_list:
         counterAwayShots += shot["made"] + shot["missed"]
         if shot["made"] != 0: counterAwayMade += shot["made"]
     if counterHomeShots != homeShots or counterAwayShots != awayShots:
-        print(event, "HomeStatTotal: ",homeShots, "HomeShotmapTotal: ", counterHomeShots, "AwayStatTotal: ",awayShots, "AwayShotmapTotal: ",counterAwayShots)
+        print(event, "HomeStatTotal:",homeShots, "HomeShotmapTotal:", counterHomeShots, "AwayStatTotal:",awayShots, "AwayShotmapTotal:",counterAwayShots)
     if counterHomeMade != homeScored or counterAwayMade != awayScored:
-        print(event, "HomeStatScored: ",homeShots, "HomeShotmapMade: ",counterHomeShots, "AwayStatMade: ",awayShots, "AwayShotmapScored: ",counterAwayShots)
-    print(counterHomeShots, counterHomeMade, homeShots, homeScored, counterAwayShots, counterAwayMade, awayShots, awayScored)
+        print(event, "HomeStatScored:",homeScored, "HomeShotmapMade:",counterHomeMade, "AwayStatMade:",awayScored, "AwayShotmapScored:",counterAwayMade)
 
 
 
