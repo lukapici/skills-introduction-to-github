@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 import psycopg2
 import requests
+import os
+
+sofaDBpass = os.getenv('SOFADBPASS')
 
 now = datetime.now()
 last72h = (now - timedelta(hours=72)).strftime("%Y-%m-%d %H:%M:%S")
 
-connDB = psycopg2.connect(database="sofascore", user="support", password="3F3tg9LwCKGQaN", host="127.0.0.1", port="5432")
+connDB = psycopg2.connect(database="sofascore", user="support", password=sofaDBpass, host="127.0.0.1", port="5432")
 cursor = connDB.cursor()
 cursor.execute("select id from season where uniquetournament_id = 132 order by enddate desc limit 1")
 season_id = str(cursor.fetchall()[0][0])
