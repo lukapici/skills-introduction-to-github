@@ -10,7 +10,7 @@ last72h = (now - timedelta(hours=72)).strftime("%Y-%m-%d %H:%M:%S")
 
 connDB = psycopg2.connect(database="sofascore", user="support", password=sofaDBpass, host="127.0.0.1", port="5432")
 cursor = connDB.cursor()
-cursor.execute("select id from season where uniquetournament_id = 132 order by enddate desc limit 1")
+cursor.execute("select id from season where uniquetournament_id in (132, 138, 235) group by uniquetournament_id, id order by enddate desc limit 3")
 season_id = str(cursor.fetchall()[0][0])
 cursor.execute("select id from event where season_id = " + season_id + " and status_type = 'finished' and startdate > '" + last72h + "'")
 event_list = cursor.fetchall()
