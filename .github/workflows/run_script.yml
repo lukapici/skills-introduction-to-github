@@ -1,4 +1,4 @@
-name: Run Python Script Daily
+name: Run Odds Providers Campaigns Daily
 
 on:
   schedule:
@@ -6,23 +6,69 @@ on:
   workflow_dispatch:  # Allows manual runs
 
 jobs:
-  run-script:
-    runs-on: ubuntu-latest
-
+  #tunnel to sofascore database
+  open_sofaDB_tunnel:
+    runs-on: [self-hosted, mini]
     steps:
-      - name: Checkout repository
+      - uses: actions/checkout@v4  
+      - name: Close sofaDB Tunnel on start
+        run: kill -9 $(ps aux | grep -E "5432 dev" | grep -v grep | awk '{{ print $2 }}')
+        continue-on-error: true
+       
+      - name: Open sofaDB Tunnel
+        run: ssh -o ExitOnForwardFailure=yes -fNL 127.0.0.1:5433:database-replica.vip.sofascore.cloud:5432 dev
+  #tunnel to qa database
+  open_qaDB_tunnel:
+    runs-on: [self-hosted, mini]
+    steps:
+      - uses: actions/checkout@v4  
+      - name: Close qaDB Tunnel on start
+        run: kill -9 $(ps aux | grep -E "5432 dev" | grep -v grep | awk '{{ print $2 }}') #copy from sofaDB
+        continue-on-error: true
+       
+      - name: Open qaDB Tunnel
+        run: ssh -o ExitOnForwardFailure=yes -fNL 127.0.0.1:5433:database-replica.vip.sofascore.cloud:5432 dev #copy from sofaDB
+
+  #running script
+  check_oddsCampaign:
+    needs: [open_sofaDB_tunnel, open_qaDB_tunnel]
+    runs-on: [self-hosted, mini, qa-mini] #options
+    steps:
+      - name: Checkout repository #by chatGPT - nisam vidio u nasima
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python #by chatGPT - nisam vidio u nasima
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12' #from pycharm
 
-      - name: Install dependencies
+      - name: Install dependencies #by chatGPT - nisam vidio u nasima dasu definiran negdje requirements od pythona niti da se pozivaju
         run: |
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
 
-      - name: Run Python script
+      - name: Run odds campaigns test
+        env:
+          sofaDB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }}
+          qaDB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }} #qa secrets password
         run: python path/to/your_script.py
+  
+  
+  close_sofaDB_tunnel:
+    if: ${{ always() && !cancelled()}}
+    needs: [open_sofaDB_tunnel, open_qaDB_tunnel, check_oddsCampaign] #not sure
+    runs-on: [self-hosted, mini]
+    steps:
+      - name: Close sofaDB Tunnel
+        if: always()
+        run: kill -9 $(ps aux | grep -E "5432 dev" | grep -v grep | awk '{{ print $2 }}')
+  
+  close_qaDB_tunnel:
+    if: ${{ always() && !cancelled()}}
+    needs: [open_sofaDB_tunnel, open_qaDB_tunnel, check_oddsCampaign] #not sure
+    runs-on: [self-hosted, mini]
+    steps:
+      - name: Close qaDB Tunnel
+        if: always()
+        run: kill -9 $(ps aux | grep -E "5432 dev" | grep -v grep | awk '{{ print $2 }}') #copy from sofaDB
