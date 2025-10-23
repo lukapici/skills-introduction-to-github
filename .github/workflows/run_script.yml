@@ -52,7 +52,7 @@ jobs:
         env:
           sofaDB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }}
           qaDB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }} #qa secrets password
-        run: python path/to/your_script.py
+        run: python oddsCampaignsTest.py
   
   
   close_sofaDB_tunnel:
