@@ -21,37 +21,22 @@ jobs:
   open_qaDB_tunnel:
     runs-on: [self-hosted, mini]
     steps:
-      - uses: actions/checkout@v4  
       - name: Close qaDB Tunnel on start
-        run: kill -9 $(ps aux | grep -E "5432 dev" | grep -v grep | awk '{{ print $2 }}') #copy from sofaDB
+        run: kill -9 $(ps aux | grep -E ":32384" | grep -v grep | awk '{{ print $2 }}') 
         continue-on-error: true
        
       - name: Open qaDB Tunnel
-        run: ssh -o ExitOnForwardFailure=yes -fNL 127.0.0.1:5433:database-replica.vip.sofascore.cloud:5432 dev #copy from sofaDB
+        run: ssh -N -T -L 5432:172.16.5.10:32384 idivic@dev 
 
   #running script
   check_oddsCampaign:
     needs: [open_sofaDB_tunnel, open_qaDB_tunnel]
-    runs-on: [self-hosted, mini, qa-mini] #options
+    runs-on: [self-hosted, mini] 
     steps:
-      - name: Checkout repository #by chatGPT - nisam vidio u nasima
-        uses: actions/checkout@v4
-
-      - name: Set up Python #by chatGPT - nisam vidio u nasima
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12' #from pycharm
-
-      - name: Install dependencies #by chatGPT - nisam vidio u nasima dasu definiran negdje requirements od pythona niti da se pozivaju
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-
       - name: Run odds campaigns test
         env:
           sofaDB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }}
-          qaDB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }} #qa secrets password
+          qaDB_PASSWORD: ${{ secrets.QA_DB_PASS }}
         run: python oddsCampaignsTest.py
   
   
@@ -71,4 +56,4 @@ jobs:
     steps:
       - name: Close qaDB Tunnel
         if: always()
-        run: kill -9 $(ps aux | grep -E "5432 dev" | grep -v grep | awk '{{ print $2 }}') #copy from sofaDB
+        run: kill -9 $(ps aux | grep -E ":32384" | grep -v grep | awk '{{ print $2 }}') #copy from sofaDB
