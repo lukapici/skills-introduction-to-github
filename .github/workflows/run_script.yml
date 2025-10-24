@@ -42,7 +42,7 @@ jobs:
   
   close_sofaDB_tunnel:
     if: ${{ always() && !cancelled()}}
-    needs: [open_sofaDB_tunnel, open_qaDB_tunnel, check_oddsCampaign] #not sure
+    needs: [open_sofaDB_tunnel, open_qaDB_tunnel, check_oddsCampaign] 
     runs-on: [self-hosted, mini]
     steps:
       - name: Close sofaDB Tunnel
@@ -51,7 +51,7 @@ jobs:
   
   close_qaDB_tunnel:
     if: ${{ always() && !cancelled()}}
-    needs: [open_sofaDB_tunnel, open_qaDB_tunnel, check_oddsCampaign] #not sure
+    needs: [open_sofaDB_tunnel, open_qaDB_tunnel, check_oddsCampaign] 
     runs-on: [self-hosted, mini]
     steps:
       - name: Close qaDB Tunnel
