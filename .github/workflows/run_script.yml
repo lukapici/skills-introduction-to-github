@@ -35,8 +35,8 @@ jobs:
     steps:
       - name: Run odds campaigns test
         env:
-          sofaDB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }}
-          qaDB_PASSWORD: ${{ secrets.QA_DB_PASS }}
+          SOFA_DB_PASSWORD: ${{ secrets.SUPPORT_DB_PASS }}
+          QA_DB_PASSWORD: ${{ secrets.QA_DB_PASS }}
         run: python oddsCampaignsTest.py
   
   
